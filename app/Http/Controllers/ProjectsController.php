@@ -9,13 +9,17 @@ class ProjectsController extends Controller
 {
     public function index()
     {
-        $projects = Project::all();
+        $projects = auth()->user()->projects;
 
         return view('projects.index', compact('projects'));
     }
 
     public function show(Project $project)
     {
+        if (auth()->user()->isNot($project->owner)) {
+            abort(403, 'You haven\'t a permission to see this project');
+        }
+
         return view('projects.show', compact('project'));
     }
 
@@ -24,7 +28,7 @@ class ProjectsController extends Controller
         $attributes = request()->validate([
             'title' => 'required',
             'description' => 'required'
-        ]);
+            ]);
 
         auth()->user()->projects()->create($attributes);
 
